@@ -40,7 +40,11 @@ func (r *repository) GetTransactionAdmin(ID int) (models.Transaction, error) {
 func (r *repository) UpdateTrans(status string, ID int) (error) {
 	var transaction models.Transaction
 	r.db.Preload("User").Preload("Cart.Book").First(&transaction, ID)
-	transaction.Status = status
+
+	if status != transaction.Status && status == "success" {
+		transaction.Status = status
+	}
+
 	err := r.db.Debug().Save(&transaction).Error
 
 	return err
