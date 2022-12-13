@@ -10,7 +10,7 @@ type TransactionRepository interface {
 	UpdateTransaction(transaction models.Transaction) (models.Transaction, error)
 	GetTransaction(userID int) (models.Transaction, error)
 	GetTransactionAdmin(ID int) (models.Transaction, error)
-	UpdateTrans(status string, ID int) (error)
+	UpdateTrans(status string, ID int) error
 	GetOneTrans(ID string) (models.Transaction, error)
 	GetOrderByID(userID int) ([]models.Transaction, error)
 	FindTransaction() ([]models.Transaction, error)
@@ -37,10 +37,14 @@ func (r *repository) GetTransactionAdmin(ID int) (models.Transaction, error) {
 	return transaction, err
 }
 
-func (r *repository) UpdateTrans(status string, ID int) (error) {
+func (r *repository) UpdateTrans(status string, ID int) error {
 	var transaction models.Transaction
 	r.db.Preload("User").Preload("Cart.Book").First(&transaction, ID)
-	transaction.Status = status
+
+	if status != transaction.Status && status == "success" {
+		transaction.Status = status
+	}
+
 	err := r.db.Debug().Save(&transaction).Error
 
 	return err
